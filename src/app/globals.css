@@ -1,0 +1,302 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-body), serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ===== VELORA Luxury Menswear Theme ===== */
+:root {
+  --radius: 0.5rem;
+
+  --background: oklch(0.985 0.008 85);
+  --foreground: oklch(0.235 0.018 50);
+
+  --card: oklch(0.995 0.005 85);
+  --card-foreground: oklch(0.235 0.018 50);
+
+  --popover: oklch(0.995 0.005 85);
+  --popover-foreground: oklch(0.235 0.018 50);
+
+  --primary: oklch(0.235 0.018 50);
+  --primary-foreground: oklch(0.985 0.008 85);
+
+  --secondary: oklch(0.94 0.012 80);
+  --secondary-foreground: oklch(0.3 0.02 55);
+
+  --muted: oklch(0.95 0.01 80);
+  --muted-foreground: oklch(0.5 0.015 60);
+
+  --accent: oklch(0.93 0.035 75);
+  --accent-foreground: oklch(0.3 0.04 55);
+
+  --destructive: oklch(0.58 0.2 25);
+  --border: oklch(0.9 0.012 80);
+  --input: oklch(0.9 0.012 80);
+  --ring: oklch(0.6 0.06 60);
+
+  --chart-1: oklch(0.6 0.1 55);
+  --chart-2: oklch(0.65 0.08 75);
+  --chart-3: oklch(0.5 0.05 45);
+  --chart-4: oklch(0.75 0.12 70);
+  --chart-5: oklch(0.45 0.03 40);
+
+  --sidebar: oklch(0.985 0.008 85);
+  --sidebar-foreground: oklch(0.235 0.018 50);
+  --sidebar-primary: oklch(0.235 0.018 50);
+  --sidebar-primary-foreground: oklch(0.985 0.008 85);
+  --sidebar-accent: oklch(0.94 0.012 80);
+  --sidebar-accent-foreground: oklch(0.3 0.02 55);
+  --sidebar-border: oklch(0.9 0.012 80);
+  --sidebar-ring: oklch(0.6 0.06 60);
+
+  /* Brand gold */
+  --gold: oklch(0.74 0.11 75);
+  --gold-soft: oklch(0.86 0.06 78);
+}
+
+.dark {
+  --background: oklch(0.19 0.012 50);
+  --foreground: oklch(0.96 0.008 85);
+
+  --card: oklch(0.235 0.012 50);
+  --card-foreground: oklch(0.96 0.008 85);
+
+  --popover: oklch(0.235 0.012 50);
+  --popover-foreground: oklch(0.96 0.008 85);
+
+  --primary: oklch(0.96 0.008 85);
+  --primary-foreground: oklch(0.19 0.012 50);
+
+  --secondary: oklch(0.3 0.012 50);
+  --secondary-foreground: oklch(0.96 0.008 85);
+
+  --muted: oklch(0.3 0.012 50);
+  --muted-foreground: oklch(0.72 0.012 70);
+
+  --accent: oklch(0.36 0.03 55);
+  --accent-foreground: oklch(0.96 0.008 85);
+
+  --destructive: oklch(0.7 0.19 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.6 0.06 60);
+
+  --chart-1: oklch(0.7 0.1 55);
+  --chart-2: oklch(0.72 0.08 75);
+  --chart-3: oklch(0.6 0.05 45);
+  --chart-4: oklch(0.78 0.12 70);
+  --chart-5: oklch(0.55 0.03 40);
+
+  --sidebar: oklch(0.235 0.012 50);
+  --sidebar-foreground: oklch(0.96 0.008 85);
+  --sidebar-primary: oklch(0.96 0.008 85);
+  --sidebar-primary-foreground: oklch(0.19 0.012 50);
+  --sidebar-accent: oklch(0.3 0.012 50);
+  --sidebar-accent-foreground: oklch(0.96 0.008 85);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.6 0.06 60);
+
+  --gold: oklch(0.78 0.11 75);
+  --gold-soft: oklch(0.4 0.05 70);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    /* Variable font optical sizing */
+    font-optical-sizing: auto;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Improved line-height & letter spacing for Arabic readability */
+    line-height: 1.75;
+    letter-spacing: 0;
+    /* Prevent text selection flash on custom cursor */
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Arabic numerals stay LTR but numbers within Arabic text flow naturally */
+}
+
+/* ===== Custom Utilities ===== */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), var(--font-tajawal), serif;
+  }
+  .text-gold {
+    color: var(--gold);
+  }
+  .bg-gold {
+    background-color: var(--gold);
+  }
+  .border-gold {
+    border-color: var(--gold);
+  }
+  .bg-grain {
+    background-image: radial-gradient(oklch(0.5 0.02 60 / 0.04) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+  .tracking-luxe {
+    letter-spacing: 0.25em;
+  }
+  .tracking-wide-luxe {
+    letter-spacing: 0.15em;
+  }
+  .shadow-luxe {
+    box-shadow: 0 10px 40px -12px oklch(0.3 0.02 50 / 0.25);
+  }
+  .shadow-soft {
+    box-shadow: 0 4px 20px -8px oklch(0.3 0.02 50 / 0.15);
+  }
+  /* Gradient text */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, oklch(0.8 0.08 80) 50%, var(--gold) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+  /* Glass effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .dark .glass {
+    background: rgba(20, 20, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+[dir="rtl"] .animate-marquee {
+  animation: marquee-rtl 30s linear infinite;
+}
+@keyframes marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.96 0.008 85);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.8 0.02 65);
+  border-radius: 999px;
+  border: 2px solid oklch(0.96 0.008 85);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.04 60);
+}
+.dark ::-webkit-scrollbar-track {
+  background: oklch(0.235 0.012 50);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.4 0.02 55);
+  border-color: oklch(0.235 0.012 50);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+::selection {
+  background: var(--gold);
+  color: oklch(0.985 0.008 85);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

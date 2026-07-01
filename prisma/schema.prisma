@@ -1,0 +1,134 @@
+// VELORA - Luxury Fashion E-commerce Schema
+// Prisma schema for clothing store
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  icon        String?
+  featured    Boolean   @default(false)
+  order       Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  description   String
+  price         Float
+  comparePrice  Float?
+  currency      String       @default("EGP")
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id])
+  images        String       // JSON array of image URLs
+  sizes         String       // JSON array of sizes
+  colors        String       // JSON array of colors
+  rating        Float        @default(0)
+  reviewCount   Int          @default(0)
+  stock         Int          @default(0)
+  sku           String       @unique
+  tags          String?      // JSON array of tags
+  badge         String?      // e.g. "جديد", "الأكثر مبيعاً", "تخفيض"
+  featured      Boolean      @default(false)
+  isActive      Boolean      @default(true)
+  material      String?
+  care          String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  authorName String
+  rating    Float
+  title     String?
+  comment   String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  sessionId String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  size      String?
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, productId, size, color])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  sessionId String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, productId])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  sessionId     String
+  customerName  String
+  email         String
+  phone         String
+  address       String
+  city          String
+  governorate   String
+  postalCode    String?
+  notes         String?
+  subtotal      Float
+  shipping      Float
+  total         Float
+  status        String      @default("pending") // pending, confirmed, shipped, delivered, cancelled
+  paymentMethod String      @default("cod") // cod, card
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Float
+  quantity  Int
+  size      String?
+  color     String?
+  image     String
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
