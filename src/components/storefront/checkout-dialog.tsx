@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { X, CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, ArrowLeft, ArrowRight } from 'lucide-react'
+import { CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, ArrowLeft, ArrowRight, Minus, Plus } from 'lucide-react'
 import { useUIStore, useCartStore, cartSubtotal, cartCount } from '@/lib/store'
 import { formatPrice } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const governorates = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'القليوبية', 'الدقهلية', 'الشرقية',
@@ -23,10 +24,11 @@ const governorates = [
 
 export function CheckoutDialog() {
   const { checkoutOpen, setCheckoutOpen } = useUIStore()
-  const { items, clear } = useCartStore()
+  const { items, clear, update, remove } = useCartStore()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<string | null>(null)
   const [payment, setPayment] = useState('cod')
+  const [step, setStep] = useState<'cart' | 'form'>('cart')
   const [form, setForm] = useState({
     customerName: '', email: '', phone: '', address: '', city: '',
     governorate: '', postalCode: '', notes: '',
@@ -37,7 +39,7 @@ export function CheckoutDialog() {
   const shipping = subtotal >= 3000 ? 0 : 70
   const total = subtotal + shipping
 
-  const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
+  const updateField = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,189 +81,256 @@ export function CheckoutDialog() {
     setCheckoutOpen(false)
     setTimeout(() => {
       setDone(null)
+      setStep('cart')
       setForm({ customerName: '', email: '', phone: '', address: '', city: '', governorate: '', postalCode: '', notes: '' })
     }, 300)
   }
 
   return (
     <Dialog open={checkoutOpen} onOpenChange={(o) => !o && close()}>
-      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden bg-background max-h-[92vh]">
+      <DialogContent showCloseButton={false} className="!max-w-sm !w-[calc(100%-2rem)] sm:!max-w-sm p-0 gap-0 overflow-hidden bg-background shadow-luxe rounded-sm">
         <DialogTitle className="sr-only">إتمام الطلب</DialogTitle>
         {done ? (
-          <div className="p-10 text-center">
-            <div className="size-20 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-5">
-              <CheckCircle2 className="size-10 text-gold" strokeWidth={1.5} />
+          <div className="p-6 text-center">
+            <div className="size-14 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="size-7 text-gold" strokeWidth={1.5} />
             </div>
-            <h2 className="font-display text-2xl font-bold text-foreground">تم استلام طلبك!</h2>
-            <p className="mt-2 text-foreground/60">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
-            <div className="mt-5 inline-flex items-center gap-2 bg-secondary px-5 py-3 rounded-sm">
-              <span className="text-sm text-foreground/60">رقم الطلب:</span>
-              <span className="font-display font-bold text-gold tracking-wide-luxe">{done}</span>
+            <h2 className="font-display text-lg font-bold text-foreground">تم استلام طلبك!</h2>
+            <p className="mt-1.5 text-xs text-foreground/60">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
+            <div className="mt-4 inline-flex items-center gap-2 bg-secondary px-4 py-2 rounded-sm">
+              <span className="text-[11px] text-foreground/60">رقم الطلب:</span>
+              <span className="font-display text-sm font-bold text-gold tracking-wide-luxe">{done}</span>
             </div>
-            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-foreground/60">
-              <Truck className="size-4 text-gold" />
+            <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-foreground/60">
+              <Truck className="size-3.5 text-gold" />
               التوصيل المتوقع خلال 2-4 أيام عمل
             </div>
-            <Button onClick={close} className="mt-6 bg-primary text-primary-foreground rounded-none px-8 tracking-wide-luxe">
+            <Button onClick={close} className="mt-5 bg-primary text-primary-foreground rounded-none px-6 text-xs tracking-wide-luxe w-full h-10">
               متابعة التسوّق
             </Button>
           </div>
-        ) : (
-          <div className="grid md:grid-cols-5 max-h-[92vh] overflow-y-auto">
-            {/* Form */}
-            <form onSubmit={submit} className="md:col-span-3 p-6 lg:p-8 space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <ArrowRight className="size-5 text-gold" />
-                <h2 className="font-display text-xl font-bold text-foreground">بيانات الشحن</h2>
+        ) : step === 'cart' ? (
+          /* Cart Summary - Same look as product card */
+          <div className="flex flex-col h-full">
+            {/* Image area - aspect-[3/4] like product card */}
+            <div className="relative overflow-hidden bg-muted aspect-[3/4] rounded-sm">
+              {/* Show first product image as background */}
+              {items.length > 0 && (
+                <img
+                  src={items[0].product?.images?.[0] || '/images/cat-suits.jpg'}
+                  alt={items[0].product?.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
+                />
+              )}
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+              {/* Cart badge */}
+              <div className="absolute top-3 right-3">
+                <span className="px-2.5 py-1 text-[10px] font-bold tracking-wide-luxe rounded-sm bg-foreground text-background backdrop-blur-sm">
+                  سلة التسوق ({count})
+                </span>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name">الاسم الكامل <span className="text-destructive">*</span></Label>
-                  <Input id="name" value={form.customerName} onChange={(e) => update('customerName', e.target.value)} required className="rounded-sm h-10" placeholder="مثال: أحمد محمد" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="phone">رقم الهاتف <span className="text-destructive">*</span></Label>
-                  <Input id="phone" value={form.phone} onChange={(e) => update('phone', e.target.value)} required className="rounded-sm h-10" placeholder="01012345678" dir="ltr" />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="email">البريد الإلكتروني <span className="text-destructive">*</span></Label>
-                <Input id="email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required className="rounded-sm h-10" placeholder="you@example.com" dir="ltr" />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="address">العنوان بالتفصيل <span className="text-destructive">*</span></Label>
-                <Input id="address" value={form.address} onChange={(e) => update('address', e.target.value)} required className="rounded-sm h-10" placeholder="الشارع، المبنى، الشقة" />
-              </div>
-
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="city">المدينة <span className="text-destructive">*</span></Label>
-                  <Input id="city" value={form.city} onChange={(e) => update('city', e.target.value)} required className="rounded-sm h-10" placeholder="المدينة" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="gov">المحافظة <span className="text-destructive">*</span></Label>
-                  <Select value={form.governorate} onValueChange={(v) => update('governorate', v)}>
-                    <SelectTrigger id="gov" className="rounded-sm h-10"><SelectValue placeholder="اختر" /></SelectTrigger>
-                    <SelectContent>
-                      {governorates.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="postal">الكود البريدي</Label>
-                  <Input id="postal" value={form.postalCode} onChange={(e) => update('postalCode', e.target.value)} className="rounded-sm h-10" placeholder="اختياري" dir="ltr" />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="notes">ملاحظات إضافية</Label>
-                <Textarea id="notes" value={form.notes} onChange={(e) => update('notes', e.target.value)} className="rounded-sm min-h-20" placeholder="أي تعليمات خاصة بالتوصيل" />
-              </div>
-
-              {/* Payment method */}
-              <div className="space-y-2 pt-2">
-                <Label>طريقة الدفع</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPayment('cod')}
-                    className={cn('flex items-center gap-3 p-3 border rounded-sm text-right transition-all',
-                      payment === 'cod' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
-                  >
-                    <Truck className={cn('size-5', payment === 'cod' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
-                    <div>
-                      <p className="text-sm font-medium">دفع عند الاستلام</p>
-                      <p className="text-[11px] text-foreground/50">ادفع نقداً عند وصول طلبك</p>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPayment('card')}
-                    className={cn('flex items-center gap-3 p-3 border rounded-sm text-right transition-all',
-                      payment === 'card' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
-                  >
-                    <CreditCard className={cn('size-5', payment === 'card' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
-                    <div>
-                      <p className="text-sm font-medium">بطاقة ائتمان</p>
-                      <p className="text-[11px] text-foreground/50">دفع آمن عبر الإنترنت</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={submitting || items.length === 0}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-12 tracking-wide-luxe font-medium mt-2"
-              >
-                {submitting ? (
-                  <><Loader2 className="size-4 animate-spin" /> جارٍ المعالجة...</>
-                ) : (
-                  <>تأكيد الطلب · {formatPrice(total)} <ArrowLeft className="size-4" /></>
-                )}
-              </Button>
-              <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1.5">
-                <ShieldCheck className="size-3.5" /> معاملتك آمنة ومشفّرة
-              </p>
-            </form>
-
-            {/* Summary */}
-	            <div className="md:col-span-2 bg-secondary/40 p-6 lg:p-8 border-s border-border">
-	              <h3 className="font-display text-lg font-bold text-foreground mb-4">ملخّص الطلب ({count})</h3>
-	              <div className="space-y-4 max-h-[60vh] overflow-y-auto mb-4 custom-scrollbar">
-	                {items.map((item) => {
-	                  const imgs: string[] = item.product?.images || []
-	                  return (
-	                    <div key={item.id} className="flex gap-4 group">
-	                      <div className="relative size-20 shrink-0 rounded-sm overflow-hidden bg-muted shadow-soft">
-	                        <img 
-	                          src={imgs[0] || '/images/cat-suits.jpg'} 
-	                          alt={item.product?.name} 
-	                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-	                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }} 
-	                        />
-	                        <span className="absolute -top-1 -left-1 size-5 rounded-full bg-gold text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
-	                          {item.quantity}
-	                        </span>
-	                      </div>
-	                      <div className="flex-1 min-w-0 py-1">
-	                        <p className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-gold transition-colors">
-	                          {item.product?.name}
-	                        </p>
-	                        <p className="text-[11px] text-foreground/50 mt-0.5 flex items-center gap-1.5">
-	                          {item.size && <span>{item.size}</span>}
-	                          {item.size && item.color && <span className="size-0.5 rounded-full bg-border" />}
-	                          {item.color && <span>{item.color}</span>}
-	                        </p>
-	                        <p className="text-sm font-display font-bold text-foreground mt-2">
-	                          {formatPrice((item.product?.price ?? 0) * item.quantity)}
-	                        </p>
-	                      </div>
-	                    </div>
-	                  )
-	                })}
-                {items.length === 0 && (
-                  <p className="text-sm text-foreground/50 text-center py-4">السلة فارغة</p>
-                )}
-              </div>
-              <div className="space-y-2 pt-4 border-t border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground/60">المجموع الفرعي</span>
-                  <span className="font-medium">{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground/60">الشحن</span>
-                  <span className="font-medium">{shipping === 0 ? <span className="text-gold">مجاني</span> : formatPrice(shipping)}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-border">
-                  <span className="font-display font-bold">الإجمالي</span>
-                  <span className="font-display font-bold text-lg text-gold">{formatPrice(total)}</span>
+              {/* Total price */}
+              <div className="absolute bottom-0 inset-x-0 p-4">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">الإجمالي</p>
+                    <p className="font-display text-xl font-bold text-white">{formatPrice(total)}</p>
+                  </div>
+                  <p className="text-[10px] text-white/60">
+                    {shipping === 0 ? 'شحن مجاني' : `+ ${formatPrice(shipping)} شحن`}
+                  </p>
                 </div>
               </div>
             </div>
+
+            {/* Info section - like product card info */}
+            <div className="pt-3 pb-3 px-3 flex flex-col flex-1">
+              {/* Items list - compact */}
+              <ScrollArea className="flex-1 max-h-[120px] mb-3">
+                <div className="space-y-2.5">
+                  {items.map((item) => {
+                    const imgs: string[] = item.product?.images || []
+                    return (
+                      <div key={item.id} className="flex gap-2.5 items-start">
+                        <div className="relative size-14 shrink-0 rounded-sm overflow-hidden bg-muted">
+                          <img 
+                            src={imgs[0] || '/images/cat-suits.jpg'} 
+                            alt={item.product?.name} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }} 
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-semibold text-foreground line-clamp-1">
+                            {item.product?.name}
+                          </p>
+                          <p className="text-[9px] text-foreground/50 mt-0.5 flex items-center gap-1">
+                            {item.size && <span>{item.size}</span>}
+                            {item.size && item.color && <span className="size-0.5 rounded-full bg-border" />}
+                            {item.color && <span>{item.color}</span>}
+                          </p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-[11px] font-display font-bold text-foreground">
+                              {formatPrice((item.product?.price ?? 0) * item.quantity)}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => update(item.id, item.quantity - 1)}
+                                className="size-5 flex items-center justify-center bg-secondary rounded-sm hover:bg-accent transition-colors"
+                              >
+                                <Minus className="size-2.5" />
+                              </button>
+                              <span className="w-5 text-center text-[10px] font-medium">{item.quantity}</span>
+                              <button
+                                onClick={() => update(item.id, item.quantity + 1)}
+                                className="size-5 flex items-center justify-center bg-secondary rounded-sm hover:bg-accent transition-colors"
+                              >
+                                <Plus className="size-2.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+
+              {/* CTA Button */}
+              <Button
+                onClick={() => setStep('form')}
+                disabled={items.length === 0}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-10 text-xs tracking-wide-luxe font-medium"
+              >
+                إتمام الطلب <ArrowLeft className="size-3.5" />
+              </Button>
+              <p className="text-[10px] text-center text-foreground/50 flex items-center justify-center gap-1 mt-2">
+                <ShieldCheck className="size-3" /> معاملتك آمنة ومشفّرة
+              </p>
+            </div>
+          </div>
+        ) : (
+          /* Checkout Form */
+          <div className="flex flex-col h-full">
+            {/* Header - compact */}
+            <div className="px-3 pt-3 pb-2 flex items-center justify-between border-b border-border">
+              <div className="flex items-center gap-1.5">
+                <ArrowRight className="size-4 text-gold" />
+                <h2 className="font-display text-sm font-bold text-foreground">بيانات الشحن</h2>
+              </div>
+              <button onClick={() => setStep('cart')} className="text-[11px] text-foreground/60 hover:text-foreground flex items-center gap-1">
+                <ArrowRight className="size-3" />
+                رجوع
+              </button>
+            </div>
+
+            <ScrollArea className="flex-1">
+              <form onSubmit={submit} className="p-3 space-y-3">
+                {/* Customer Info */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <Label htmlFor="name" className="text-[10px]">الاسم الكامل <span className="text-destructive">*</span></Label>
+                    <Input id="name" value={form.customerName} onChange={(e) => updateField('customerName', e.target.value)} required className="rounded-sm h-8 text-[11px]" placeholder="أحمد محمد" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="phone" className="text-[10px]">الهاتف <span className="text-destructive">*</span></Label>
+                    <Input id="phone" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} required className="rounded-sm h-8 text-[11px]" placeholder="01012345678" dir="ltr" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-[10px]">البريد الإلكتروني <span className="text-destructive">*</span></Label>
+                  <Input id="email" type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} required className="rounded-sm h-8 text-[11px]" placeholder="you@example.com" dir="ltr" />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="address" className="text-[10px]">العنوان <span className="text-destructive">*</span></Label>
+                  <Input id="address" value={form.address} onChange={(e) => updateField('address', e.target.value)} required className="rounded-sm h-8 text-[11px]" placeholder="الشارع، المبنى، الشقة" />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div className="space-y-1">
+                    <Label htmlFor="city" className="text-[10px]">المدينة <span className="text-destructive">*</span></Label>
+                    <Input id="city" value={form.city} onChange={(e) => updateField('city', e.target.value)} required className="rounded-sm h-8 text-[11px]" placeholder="المدينة" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="gov" className="text-[10px]">المحافظة <span className="text-destructive">*</span></Label>
+                    <Select value={form.governorate} onValueChange={(v) => updateField('governorate', v)}>
+                      <SelectTrigger id="gov" className="rounded-sm h-8 text-[11px]"><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectContent>
+                        {governorates.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="postal" className="text-[10px]">الكود البريدي</Label>
+                    <Input id="postal" value={form.postalCode} onChange={(e) => updateField('postalCode', e.target.value)} className="rounded-sm h-8 text-[11px]" placeholder="اختياري" dir="ltr" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="notes" className="text-[10px]">ملاحظات</Label>
+                  <Textarea id="notes" value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="rounded-sm min-h-14 text-[11px]" placeholder="تعليمات خاصة بالتوصيل" />
+                </div>
+
+                {/* Payment method */}
+                <div className="space-y-1.5 pt-1">
+                  <Label className="text-[10px]">طريقة الدفع</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayment('cod')}
+                      className={cn('flex items-center gap-2 p-2 border rounded-sm text-right transition-all',
+                        payment === 'cod' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
+                    >
+                      <Truck className={cn('size-3.5', payment === 'cod' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
+                      <span className="text-[10px] font-medium">عند الاستلام</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPayment('card')}
+                      className={cn('flex items-center gap-2 p-2 border rounded-sm text-right transition-all',
+                        payment === 'card' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
+                    >
+                      <CreditCard className={cn('size-3.5', payment === 'card' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
+                      <span className="text-[10px] font-medium">بطاقة ائتمان</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-foreground/60">الإجمالي</span>
+                    <span className="font-display text-sm font-bold text-gold">{formatPrice(total)}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-foreground/50">
+                    <Truck className="size-3 text-gold" />
+                    {shipping === 0 ? 'شحن مجاني' : formatPrice(shipping)}
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={submitting || items.length === 0}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-10 text-xs tracking-wide-luxe font-medium mt-1"
+                >
+                  {submitting ? (
+                    <><Loader2 className="size-3.5 animate-spin" /> جارٍ المعالجة...</>
+                  ) : (
+                    <>تأكيد الطلب <ArrowLeft className="size-3.5" /></>
+                  )}
+                </Button>
+                <p className="text-[10px] text-center text-foreground/50 flex items-center justify-center gap-1">
+                  <ShieldCheck className="size-3" /> معاملتك آمنة ومشفّرة
+                </p>
+              </form>
+            </ScrollArea>
           </div>
         )}
       </DialogContent>
