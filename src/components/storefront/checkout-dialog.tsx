@@ -12,7 +12,6 @@ import { formatPrice } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 const governorates = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'القليوبية', 'الدقهلية', 'الشرقية',
@@ -86,30 +85,31 @@ export function CheckoutDialog() {
 
   return (
     <Dialog open={checkoutOpen} onOpenChange={(o) => !o && close()}>
-      <DialogContent className="!max-w-6xl !w-[96vw] sm:!max-w-6xl h-[92vh] p-0 gap-0 overflow-hidden bg-background rounded-lg">
+      <DialogContent className="!max-w-6xl !w-[96vw] sm:!max-w-6xl h-[92vh] p-0 gap-0 bg-background rounded-lg flex flex-col">
         <DialogTitle className="sr-only">إتمام الطلب</DialogTitle>
-        {done ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-7 lg:p-9">
-            <div className="size-16 rounded-full bg-gold/15 flex items-center justify-center mb-5">
-              <CheckCircle2 className="size-8 text-gold" strokeWidth={1.5} />
+        
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {done ? (
+            <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center p-7 lg:p-9">
+              <div className="size-16 rounded-full bg-gold/15 flex items-center justify-center mb-5">
+                <CheckCircle2 className="size-8 text-gold" strokeWidth={1.5} />
+              </div>
+              <h2 className="font-display text-xl font-bold text-foreground">تم استلام طلبك!</h2>
+              <p className="mt-2 text-sm text-foreground/60 text-center">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
+              <div className="mt-5 inline-flex items-center gap-2 bg-secondary px-5 py-2.5 rounded-sm">
+                <span className="text-sm text-foreground/60">رقم الطلب:</span>
+                <span className="font-display text-base font-bold text-gold tracking-wide-luxe">{done}</span>
+              </div>
+              <div className="mt-5 flex items-center justify-center gap-2 text-xs text-foreground/60">
+                <Truck className="size-4 text-gold" />
+                التوصيل المتوقع خلال 2-4 أيام عمل
+              </div>
+              <Button onClick={close} className="mt-6 bg-primary text-primary-foreground rounded-none px-8 text-sm tracking-wide-luxe w-full max-w-xs h-11">
+                متابعة التسوّق
+              </Button>
             </div>
-            <h2 className="font-display text-xl font-bold text-foreground">تم استلام طلبك!</h2>
-            <p className="mt-2 text-sm text-foreground/60 text-center">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
-            <div className="mt-5 inline-flex items-center gap-2 bg-secondary px-5 py-2.5 rounded-sm">
-              <span className="text-sm text-foreground/60">رقم الطلب:</span>
-              <span className="font-display text-base font-bold text-gold tracking-wide-luxe">{done}</span>
-            </div>
-            <div className="mt-5 flex items-center justify-center gap-2 text-xs text-foreground/60">
-              <Truck className="size-4 text-gold" />
-              التوصيل المتوقع خلال 2-4 أيام عمل
-            </div>
-            <Button onClick={close} className="mt-6 bg-primary text-primary-foreground rounded-none px-8 text-sm tracking-wide-luxe w-full max-w-xs h-11">
-              متابعة التسوّق
-            </Button>
-          </div>
-        ) : (
-          <ScrollArea className="h-full w-full">
-            <div className="p-7 lg:p-9 max-w-4xl mx-auto flex flex-col h-full">
+          ) : (
+            <div className="p-7 lg:p-9 max-w-4xl mx-auto flex flex-col">
               <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground leading-tight text-center mb-8">إتمام الطلب</h2>
 
               {/* Cart items summary */}
@@ -290,8 +290,8 @@ export function CheckoutDialog() {
                 </div>
               </form>
             </div>
-          </ScrollArea>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
