@@ -105,7 +105,7 @@ export function SearchDialog() {
                     className="w-full flex items-center gap-4 p-3 hover:bg-secondary/50 transition-colors text-right"
                   >
                     <div className="size-16 shrink-0 rounded-sm overflow-hidden bg-muted">
-                      <img src={imgs[0] || '/images/cat-women.jpg'} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-women.jpg' }} />
+                      <img src={imgs[0] || '/images/cat-suits.jpg'} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground line-clamp-1">{p.name}</p>
