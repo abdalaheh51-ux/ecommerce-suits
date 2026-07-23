@@ -28,7 +28,7 @@ export function CheckoutDialog() {
   const [done, setDone] = useState<string | null>(null)
   const [payment, setPayment] = useState('cod')
   const [form, setForm] = useState({
-    customerName: '', email: '', phone: '', address: '', city: '',
+    customerName: '', email: '', phone: '', address: '',
     governorate: '', postalCode: '', notes: '',
   })
 
@@ -41,7 +41,7 @@ export function CheckoutDialog() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.customerName || !form.email || !form.phone || !form.address || !form.city || !form.governorate) {
+    if (!form.customerName || !form.email || !form.phone || !form.address || !form.governorate) {
       toast.error('يرجى تعبئة جميع الحقول المطلوبة')
       return
     }
@@ -58,7 +58,7 @@ export function CheckoutDialog() {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, paymentMethod: payment }),
+        body: JSON.stringify({ ...form, paymentMethod: payment, city: form.governorate }), // استخدام المحافظة كمدينة مؤقتاً للتوافق مع API
       })
       const data = await res.json()
       if (!res.ok) {
@@ -79,7 +79,7 @@ export function CheckoutDialog() {
     setCheckoutOpen(false)
     setTimeout(() => {
       setDone(null)
-      setForm({ customerName: '', email: '', phone: '', address: '', city: '', governorate: '', postalCode: '', notes: '' })
+      setForm({ customerName: '', email: '', phone: '', address: '', governorate: '', postalCode: '', notes: '' })
     }, 300)
   }
 
@@ -209,11 +209,7 @@ export function CheckoutDialog() {
                     <Input id="address" value={form.address} onChange={(e) => updateField('address', e.target.value)} required className="rounded-sm h-11 text-sm" placeholder="الشارع، المبنى، رقم الشقة" />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city" className="text-xs">المدينة <span className="text-destructive">*</span></Label>
-                      <Input id="city" value={form.city} onChange={(e) => updateField('city', e.target.value)} required className="rounded-sm h-11 text-sm" placeholder="المدينة" />
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="gov" className="text-xs">المحافظة <span className="text-destructive">*</span></Label>
                       <Select value={form.governorate} onValueChange={(v) => updateField('governorate', v)}>
