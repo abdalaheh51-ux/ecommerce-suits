@@ -94,7 +94,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           src={product.images[imgIndex] || '/images/cat-suits.jpg'}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
-          onMouseEnter={() => product.images[1] && setImgIndex(1)}
+          // onMouseEnter={() => product.images[1] && setImgIndex(1)}
           onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
         />
 

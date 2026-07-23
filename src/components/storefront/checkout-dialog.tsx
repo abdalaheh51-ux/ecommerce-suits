@@ -209,25 +209,40 @@ export function CheckoutDialog() {
             </form>
 
             {/* Summary */}
-            <div className="md:col-span-2 bg-secondary/40 p-6 lg:p-8 border-s border-border">
-              <h3 className="font-display text-lg font-bold text-foreground mb-4">ملخّص الطلب ({count})</h3>
-              <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
-                {items.map((item) => {
-                  const imgs: string[] = item.product?.images || []
-                  return (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="relative size-16 shrink-0 rounded-sm overflow-hidden bg-muted">
-                        <img src={imgs[0] || '/images/cat-women.jpg'} alt={item.product?.name} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-women.jpg' }} />
-                        <span className="absolute -top-1 -left-1 size-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{item.quantity}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-foreground line-clamp-1">{item.product?.name}</p>
-                        <p className="text-[11px] text-foreground/50">{item.size} · {item.color}</p>
-                        <p className="text-xs font-bold text-foreground mt-0.5">{formatPrice((item.product?.price ?? 0) * item.quantity)}</p>
-                      </div>
-                    </div>
-                  )
-                })}
+	            <div className="md:col-span-2 bg-secondary/40 p-6 lg:p-8 border-s border-border">
+	              <h3 className="font-display text-lg font-bold text-foreground mb-4">ملخّص الطلب ({count})</h3>
+	              <div className="space-y-4 max-h-[60vh] overflow-y-auto mb-4 custom-scrollbar">
+	                {items.map((item) => {
+	                  const imgs: string[] = item.product?.images || []
+	                  return (
+	                    <div key={item.id} className="flex gap-4 group">
+	                      <div className="relative size-20 shrink-0 rounded-sm overflow-hidden bg-muted shadow-soft">
+	                        <img 
+	                          src={imgs[0] || '/images/cat-suits.jpg'} 
+	                          alt={item.product?.name} 
+	                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+	                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }} 
+	                        />
+	                        <span className="absolute -top-1 -left-1 size-5 rounded-full bg-gold text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
+	                          {item.quantity}
+	                        </span>
+	                      </div>
+	                      <div className="flex-1 min-w-0 py-1">
+	                        <p className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-gold transition-colors">
+	                          {item.product?.name}
+	                        </p>
+	                        <p className="text-[11px] text-foreground/50 mt-0.5 flex items-center gap-1.5">
+	                          {item.size && <span>{item.size}</span>}
+	                          {item.size && item.color && <span className="size-0.5 rounded-full bg-border" />}
+	                          {item.color && <span>{item.color}</span>}
+	                        </p>
+	                        <p className="text-sm font-display font-bold text-foreground mt-2">
+	                          {formatPrice((item.product?.price ?? 0) * item.quantity)}
+	                        </p>
+	                      </div>
+	                    </div>
+	                  )
+	                })}
                 {items.length === 0 && (
                   <p className="text-sm text-foreground/50 text-center py-4">السلة فارغة</p>
                 )}

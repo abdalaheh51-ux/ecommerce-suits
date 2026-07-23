@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSessionId } from '@/lib/session'
+import { serializeProduct } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +13,11 @@ export async function GET() {
       include: { product: { include: { category: true } } },
       orderBy: { createdAt: 'desc' },
     })
-    return NextResponse.json({ items })
+    const serializedItems = items.map(item => ({
+      ...item,
+      product: serializeProduct(item.product)
+    }))
+    return NextResponse.json({ items: serializedItems })
   } catch (e: any) {
     console.error('GET /api/cart error', e)
     return NextResponse.json({ error: 'فشل تحميل السلة' }, { status: 500 })
@@ -52,7 +57,12 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json({ item })
+    return NextResponse.json({ 
+      item: {
+        ...item,
+        product: serializeProduct(item.product)
+      }
+    })
   } catch (e: any) {
     console.error('POST /api/cart error', e)
     return NextResponse.json({ error: 'فشل إضافة المنتج للسلة' }, { status: 500 })

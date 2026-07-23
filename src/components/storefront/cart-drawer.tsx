@@ -66,59 +66,60 @@ export function CartDrawer() {
               </div>
             </div>
 
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 max-h-[50vh]">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-3 group">
-                  <div className="size-24 shrink-0 rounded-sm overflow-hidden bg-muted">
-                    <img
-                      src={item.product?.images?.[0] || '/images/cat-women.jpg'}
-                      alt={item.product?.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-women.jpg' }}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-medium text-sm text-foreground line-clamp-1">{item.product?.name}</h4>
-                      <button
-                        onClick={() => remove(item.id)}
-                        className="text-foreground/30 hover:text-destructive transition-colors shrink-0"
-                        aria-label="حذف"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-foreground/50">
-                      {item.size && <span>المقاس: {item.size}</span>}
-                      {item.color && <span>· اللون: {item.color}</span>}
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-border rounded-sm">
-                        <button
-                          onClick={() => update(item.id, item.quantity - 1)}
-                          className="size-7 flex items-center justify-center hover:bg-secondary transition-colors"
-                          aria-label="إنقاص"
-                        >
-                          <Minus className="size-3" />
-                        </button>
-                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                        <button
-                          onClick={() => update(item.id, item.quantity + 1)}
-                          className="size-7 flex items-center justify-center hover:bg-secondary transition-colors"
-                          aria-label="زيادة"
-                        >
-                          <Plus className="size-3" />
-                        </button>
-                      </div>
-                      <span className="font-display font-bold text-sm text-foreground">
-                        {formatPrice((item.product?.price ?? 0) * item.quantity)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+	            {/* Items */}
+	            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 max-h-[60vh] custom-scrollbar">
+	              {items.map((item) => (
+	                <div key={item.id} className="flex gap-4 group">
+	                  <div className="size-24 shrink-0 rounded-sm overflow-hidden bg-muted shadow-soft">
+	                    <img
+	                      src={item.product?.images?.[0] || '/images/cat-suits.jpg'}
+	                      alt={item.product?.name}
+	                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+	                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
+	                    />
+	                  </div>
+	                  <div className="flex-1 min-w-0 py-0.5">
+	                    <div className="flex items-start justify-between gap-2">
+	                      <h4 className="font-semibold text-sm text-foreground line-clamp-1 group-hover:text-gold transition-colors">{item.product?.name}</h4>
+	                      <button
+	                        onClick={() => remove(item.id)}
+	                        className="text-foreground/30 hover:text-destructive transition-colors shrink-0"
+	                        aria-label="حذف"
+	                      >
+	                        <Trash2 className="size-4" />
+	                      </button>
+	                    </div>
+	                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-foreground/50">
+	                      {item.size && <span>{item.size}</span>}
+	                      {item.size && item.color && <span className="size-0.5 rounded-full bg-border" />}
+	                      {item.color && <span>{item.color}</span>}
+	                    </div>
+	                    <div className="flex items-center justify-between mt-4">
+	                      <div className="flex items-center border border-border rounded-none bg-background">
+	                        <button
+	                          onClick={() => update(item.id, item.quantity - 1)}
+	                          className="size-7 flex items-center justify-center hover:bg-secondary transition-colors"
+	                          aria-label="إنقاص"
+	                        >
+	                          <Minus className="size-3" />
+	                        </button>
+	                        <span className="w-8 text-center text-xs font-medium">{item.quantity}</span>
+	                        <button
+	                          onClick={() => update(item.id, item.quantity + 1)}
+	                          className="size-7 flex items-center justify-center hover:bg-secondary transition-colors"
+	                          aria-label="زيادة"
+	                        >
+	                          <Plus className="size-3" />
+	                        </button>
+	                      </div>
+	                      <span className="font-display font-bold text-sm text-foreground">
+	                        {formatPrice((item.product?.price ?? 0) * item.quantity)}
+	                      </span>
+	                    </div>
+	                  </div>
+	                </div>
+	              ))}
+	            </div>
 
             {/* Summary */}
             <div className="border-t border-border px-5 py-4 space-y-3 bg-background">
