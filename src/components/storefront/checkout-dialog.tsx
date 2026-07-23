@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, ArrowLeft, Minus, Plus } from 'lucide-react'
+import { CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, Minus, Plus } from 'lucide-react'
 import { useUIStore, useCartStore, cartSubtotal, cartCount } from '@/lib/store'
 import { formatPrice } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -24,7 +24,7 @@ const governorates = [
 
 export function CheckoutDialog() {
   const { checkoutOpen, setCheckoutOpen } = useUIStore()
-  const { items, clear, update, remove } = useCartStore()
+  const { items, clear, update } = useCartStore()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<string | null>(null)
   const [payment, setPayment] = useState('cod')
@@ -86,70 +86,84 @@ export function CheckoutDialog() {
 
   return (
     <Dialog open={checkoutOpen} onOpenChange={(o) => !o && close()}>
-      <DialogContent showCloseButton={false} className="!max-w-lg !w-[calc(100%-2rem)] sm:!max-w-lg p-0 gap-0 overflow-hidden bg-background shadow-luxe rounded-sm">
+      <DialogContent className="!max-w-6xl !w-[96vw] sm:!max-w-6xl h-[92vh] p-0 gap-0 overflow-hidden bg-background rounded-lg">
         <DialogTitle className="sr-only">إتمام الطلب</DialogTitle>
         {done ? (
-          <div className="p-8 text-center">
-            <div className="size-16 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-5">
-              <CheckCircle2 className="size-8 text-gold" strokeWidth={1.5} />
+          <div className="grid md:grid-cols-2 h-full">
+            <div className="bg-muted relative h-full">
+              <div className="absolute inset-0">
+                {items.length > 0 && (
+                  <img
+                    src={items[0].product?.images?.[0] || '/images/cat-suits.jpg'}
+                    alt={items[0].product?.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
+                  />
+                )}
+              </div>
             </div>
-            <h2 className="font-display text-xl font-bold text-foreground">تم استلام طلبك!</h2>
-            <p className="mt-2 text-sm text-foreground/60">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
-            <div className="mt-5 inline-flex items-center gap-2 bg-secondary px-5 py-2.5 rounded-sm">
-              <span className="text-sm text-foreground/60">رقم الطلب:</span>
-              <span className="font-display text-base font-bold text-gold tracking-wide-luxe">{done}</span>
+            <div className="p-7 lg:p-9 flex flex-col items-center justify-center h-full overflow-hidden">
+              <div className="size-16 rounded-full bg-gold/15 flex items-center justify-center mb-5">
+                <CheckCircle2 className="size-8 text-gold" strokeWidth={1.5} />
+              </div>
+              <h2 className="font-display text-xl font-bold text-foreground">تم استلام طلبك!</h2>
+              <p className="mt-2 text-sm text-foreground/60 text-center">شكراً لك. سنتواصل معك قريباً لتأكيد الطلب.</p>
+              <div className="mt-5 inline-flex items-center gap-2 bg-secondary px-5 py-2.5 rounded-sm">
+                <span className="text-sm text-foreground/60">رقم الطلب:</span>
+                <span className="font-display text-base font-bold text-gold tracking-wide-luxe">{done}</span>
+              </div>
+              <div className="mt-5 flex items-center justify-center gap-2 text-xs text-foreground/60">
+                <Truck className="size-4 text-gold" />
+                التوصيل المتوقع خلال 2-4 أيام عمل
+              </div>
+              <Button onClick={close} className="mt-6 bg-primary text-primary-foreground rounded-none px-8 text-sm tracking-wide-luxe w-full max-w-xs h-11">
+                متابعة التسوّق
+              </Button>
             </div>
-            <div className="mt-5 flex items-center justify-center gap-2 text-xs text-foreground/60">
-              <Truck className="size-4 text-gold" />
-              التوصيل المتوقع خلال 2-4 أيام عمل
-            </div>
-            <Button onClick={close} className="mt-6 bg-primary text-primary-foreground rounded-none px-8 text-sm tracking-wide-luxe w-full h-11">
-              متابعة التسوّق
-            </Button>
           </div>
         ) : (
-          /* Single Combined Stage: Cart Summary + Form + Payment */
-          <div className="flex flex-col h-full">
-            {/* Image area - aspect-[3/4] like product card */}
-            <div className="relative overflow-hidden bg-muted aspect-[3/4] max-h-[320px] rounded-sm">
-              {items.length > 0 && (
-                <img
-                  src={items[0].product?.images?.[0] || '/images/cat-suits.jpg'}
-                  alt={items[0].product?.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
-                />
-              )}
-
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-              {/* Cart badge */}
-              <div className="absolute top-3 right-3">
-                <span className="px-2.5 py-1 text-xs font-bold tracking-wide-luxe rounded-sm bg-foreground text-background backdrop-blur-sm">
+          /* Single Stage: Same layout as QuickView (image left, form right) */
+          <div className="grid md:grid-cols-2 h-full overflow-hidden">
+            {/* Images — full height */}
+            <div className="bg-muted relative h-full">
+              <div className="absolute inset-0">
+                {items.length > 0 ? (
+                  <img
+                    src={items[0].product?.images?.[0] || '/images/cat-suits.jpg'}
+                    alt={items[0].product?.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/cat-suits.jpg' }}
+                  />
+                ) : (
+                  <img src="/images/cat-suits.jpg" alt="" className="w-full h-full object-cover" />
+                )}
+                {/* Badge */}
+                <span className="absolute top-4 right-4 px-3 py-1.5 text-xs font-bold tracking-wide-luxe bg-foreground text-background rounded-sm">
                   إتمام الطلب ({count})
                 </span>
-              </div>
-
-              {/* Total price */}
-              <div className="absolute bottom-0 inset-x-0 p-5">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">الإجمالي</p>
-                    <p className="font-display text-2xl font-bold text-white">{formatPrice(total)}</p>
+                {/* Items thumbnails */}
+                {items.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    {items.slice(1, 5).map((item) => {
+                      const imgs: string[] = item.product?.images || []
+                      return (
+                        <div key={item.id} className="size-14 rounded-sm overflow-hidden border-2 border-transparent opacity-70 hover:opacity-100 transition-all">
+                          <img src={imgs[0] || '/images/cat-suits.jpg'} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )
+                    })}
                   </div>
-                  <p className="text-xs text-white/60">
-                    {shipping === 0 ? 'شحن مجاني' : `+ ${formatPrice(shipping)} شحن`}
-                  </p>
-                </div>
+                )}
               </div>
             </div>
 
-            {/* Combined section: Items + Form + Payment */}
-            <ScrollArea className="flex-1">
-              <form onSubmit={submit} className="pt-4 pb-4 px-4 space-y-3">
-                {/* Items list */}
-                <div className="space-y-2.5">
+            {/* Details & Form — compact, scrollable */}
+            <ScrollArea className="h-full">
+              <div className="p-7 lg:p-9 flex flex-col h-full">
+                <h2 className="font-display text-xl lg:text-2xl font-bold text-foreground leading-tight">إتمام الطلب</h2>
+
+                {/* Cart items summary */}
+                <div className="mt-4 space-y-3">
                   {items.map((item) => {
                     const imgs: string[] = item.product?.images || []
                     return (
@@ -199,98 +213,108 @@ export function CheckoutDialog() {
                   })}
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-border my-2" />
-
-                {/* Customer Info */}
-                <h3 className="text-xs font-bold text-foreground/80 uppercase tracking-wider mb-2">بيانات الشحن</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-xs">الاسم الكامل <span className="text-destructive">*</span></Label>
-                    <Input id="name" value={form.customerName} onChange={(e) => updateField('customerName', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="أحمد محمد" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="phone" className="text-xs">الهاتف <span className="text-destructive">*</span></Label>
-                    <Input id="phone" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="01012345678" dir="ltr" />
+                {/* Divider + Total */}
+                <div className="mt-4 pt-3 border-t border-border flex justify-between items-center">
+                  <span className="text-xs text-foreground/60">الإجمالي مع الشحن</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-foreground/50">
+                      {shipping === 0 ? 'شحن مجاني' : `+ ${formatPrice(shipping)}`}
+                    </span>
+                    <span className="font-display text-lg font-bold text-foreground">{formatPrice(total)}</span>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs">البريد الإلكتروني <span className="text-destructive">*</span></Label>
-                  <Input id="email" type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="you@example.com" dir="ltr" />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="address" className="text-xs">العنوان <span className="text-destructive">*</span></Label>
-                  <Input id="address" value={form.address} onChange={(e) => updateField('address', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="الشارع، المبنى، الشقة" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="city" className="text-xs">المدينة <span className="text-destructive">*</span></Label>
-                    <Input id="city" value={form.city} onChange={(e) => updateField('city', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="المدينة" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="gov" className="text-xs">المحافظة <span className="text-destructive">*</span></Label>
-                    <Select value={form.governorate} onValueChange={(v) => updateField('governorate', v)}>
-                      <SelectTrigger id="gov" className="rounded-sm h-9 text-xs"><SelectValue placeholder="اختر" /></SelectTrigger>
-                      <SelectContent>
-                        {governorates.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="postal" className="text-xs">الكود البريدي</Label>
-                    <Input id="postal" value={form.postalCode} onChange={(e) => updateField('postalCode', e.target.value)} className="rounded-sm h-9 text-xs" placeholder="اختياري" dir="ltr" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="notes" className="text-xs">ملاحظات</Label>
-                  <Textarea id="notes" value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="rounded-sm min-h-14 text-xs" placeholder="تعليمات خاصة بالتوصيل" />
-                </div>
-
-                {/* Payment method */}
-                <div className="space-y-2 pt-1">
-                  <Label className="text-xs">طريقة الدفع</Label>
+                {/* Form */}
+                <form onSubmit={submit} className="mt-4 space-y-3">
+                  <h3 className="text-xs font-bold text-foreground/80 uppercase tracking-wider">بيانات الشحن</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setPayment('cod')}
-                      className={cn('flex items-center gap-2.5 p-3 border rounded-sm text-right transition-all',
-                        payment === 'cod' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
-                    >
-                      <Truck className={cn('size-4', payment === 'cod' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
-                      <span className="text-xs font-medium">عند الاستلام</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPayment('card')}
-                      className={cn('flex items-center gap-2.5 p-3 border rounded-sm text-right transition-all',
-                        payment === 'card' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
-                    >
-                      <CreditCard className={cn('size-4', payment === 'card' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
-                      <span className="text-xs font-medium">بطاقة ائتمان</span>
-                    </button>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-xs">الاسم الكامل <span className="text-destructive">*</span></Label>
+                      <Input id="name" value={form.customerName} onChange={(e) => updateField('customerName', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="أحمد محمد" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="phone" className="text-xs">الهاتف <span className="text-destructive">*</span></Label>
+                      <Input id="phone" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="01012345678" dir="ltr" />
+                    </div>
                   </div>
-                </div>
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  disabled={submitting || items.length === 0}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-11 text-sm tracking-wide-luxe font-medium mt-3"
-                >
-                  {submitting ? (
-                    <><Loader2 className="size-4 animate-spin" /> جارٍ المعالجة...</>
-                  ) : (
-                    <>تأكيد الطلب <ArrowLeft className="size-4" /></>
-                  )}
-                </Button>
-                <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1 pb-1">
-                  <ShieldCheck className="size-3.5" /> معاملتك آمنة ومشفّرة
-                </p>
-              </form>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs">البريد الإلكتروني <span className="text-destructive">*</span></Label>
+                    <Input id="email" type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="you@example.com" dir="ltr" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="address" className="text-xs">العنوان <span className="text-destructive">*</span></Label>
+                    <Input id="address" value={form.address} onChange={(e) => updateField('address', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="الشارع، المبنى، الشقة" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="city" className="text-xs">المدينة <span className="text-destructive">*</span></Label>
+                      <Input id="city" value={form.city} onChange={(e) => updateField('city', e.target.value)} required className="rounded-sm h-9 text-xs" placeholder="المدينة" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="gov" className="text-xs">المحافظة <span className="text-destructive">*</span></Label>
+                      <Select value={form.governorate} onValueChange={(v) => updateField('governorate', v)}>
+                        <SelectTrigger id="gov" className="rounded-sm h-9 text-xs"><SelectValue placeholder="اختر" /></SelectTrigger>
+                        <SelectContent>
+                          {governorates.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="postal" className="text-xs">الكود البريدي</Label>
+                      <Input id="postal" value={form.postalCode} onChange={(e) => updateField('postalCode', e.target.value)} className="rounded-sm h-9 text-xs" placeholder="اختياري" dir="ltr" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="notes" className="text-xs">ملاحظات</Label>
+                    <Textarea id="notes" value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="rounded-sm min-h-14 text-xs" placeholder="تعليمات خاصة بالتوصيل" />
+                  </div>
+
+                  {/* Payment method */}
+                  <div className="space-y-2 pt-1">
+                    <Label className="text-xs">طريقة الدفع</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPayment('cod')}
+                        className={cn('flex items-center gap-2.5 p-3 border rounded-sm text-right transition-all',
+                          payment === 'cod' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
+                      >
+                        <Truck className={cn('size-4', payment === 'cod' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
+                        <span className="text-xs font-medium">عند الاستلام</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayment('card')}
+                        className={cn('flex items-center gap-2.5 p-3 border rounded-sm text-right transition-all',
+                          payment === 'card' ? 'border-gold bg-gold/5' : 'border-border hover:border-foreground/30')}
+                      >
+                        <CreditCard className={cn('size-4', payment === 'card' ? 'text-gold' : 'text-foreground/50')} strokeWidth={1.5} />
+                        <span className="text-xs font-medium">بطاقة ائتمان</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={submitting || items.length === 0}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-11 text-sm tracking-wide-luxe font-medium mt-4"
+                  >
+                    {submitting ? (
+                      <><Loader2 className="size-4 animate-spin" /> جارٍ المعالجة...</>
+                    ) : (
+                      <>تأكيد الطلب</>
+                    )}
+                  </Button>
+                  <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1">
+                    <ShieldCheck className="size-3.5" /> معاملتك آمنة ومشفّرة
+                  </p>
+                </form>
+              </div>
             </ScrollArea>
           </div>
         )}
