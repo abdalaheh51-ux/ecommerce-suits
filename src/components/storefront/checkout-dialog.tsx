@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, ArrowLeft, ArrowRight, Minus, Plus } from 'lucide-react'
+import { CreditCard, Truck, CheckCircle2, Loader2, ShieldCheck, ArrowLeft, Minus, Plus } from 'lucide-react'
 import { useUIStore, useCartStore, cartSubtotal, cartCount } from '@/lib/store'
 import { formatPrice } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,6 @@ export function CheckoutDialog() {
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<string | null>(null)
   const [payment, setPayment] = useState('cod')
-  const [step, setStep] = useState<'cart' | 'form'>('cart')
   const [form, setForm] = useState({
     customerName: '', email: '', phone: '', address: '', city: '',
     governorate: '', postalCode: '', notes: '',
@@ -81,7 +80,6 @@ export function CheckoutDialog() {
     setCheckoutOpen(false)
     setTimeout(() => {
       setDone(null)
-      setStep('cart')
       setForm({ customerName: '', email: '', phone: '', address: '', city: '', governorate: '', postalCode: '', notes: '' })
     }, 300)
   }
@@ -109,11 +107,11 @@ export function CheckoutDialog() {
               متابعة التسوّق
             </Button>
           </div>
-        ) : step === 'cart' ? (
-          /* Cart Summary - Same look as product card but larger */
+        ) : (
+          /* Single Combined Stage: Cart Summary + Form + Payment */
           <div className="flex flex-col h-full">
             {/* Image area - aspect-[3/4] like product card */}
-            <div className="relative overflow-hidden bg-muted aspect-[3/4] rounded-sm">
+            <div className="relative overflow-hidden bg-muted aspect-[3/4] max-h-[320px] rounded-sm">
               {items.length > 0 && (
                 <img
                   src={items[0].product?.images?.[0] || '/images/cat-suits.jpg'}
@@ -129,7 +127,7 @@ export function CheckoutDialog() {
               {/* Cart badge */}
               <div className="absolute top-3 right-3">
                 <span className="px-2.5 py-1 text-xs font-bold tracking-wide-luxe rounded-sm bg-foreground text-background backdrop-blur-sm">
-                  سلة التسوق ({count})
+                  إتمام الطلب ({count})
                 </span>
               </div>
 
@@ -147,16 +145,16 @@ export function CheckoutDialog() {
               </div>
             </div>
 
-            {/* Info section */}
-            <div className="pt-4 pb-4 px-4 flex flex-col flex-1">
-              {/* Items list */}
-              <ScrollArea className="flex-1 max-h-[160px] mb-4">
-                <div className="space-y-3">
+            {/* Combined section: Items + Form + Payment */}
+            <ScrollArea className="flex-1">
+              <form onSubmit={submit} className="pt-4 pb-4 px-4 space-y-3">
+                {/* Items list */}
+                <div className="space-y-2.5">
                   {items.map((item) => {
                     const imgs: string[] = item.product?.images || []
                     return (
                       <div key={item.id} className="flex gap-3 items-start">
-                        <div className="relative size-16 shrink-0 rounded-sm overflow-hidden bg-muted">
+                        <div className="relative size-14 shrink-0 rounded-sm overflow-hidden bg-muted">
                           <img 
                             src={imgs[0] || '/images/cat-suits.jpg'} 
                             alt={item.product?.name} 
@@ -173,12 +171,13 @@ export function CheckoutDialog() {
                             {item.size && item.color && <span className="size-0.5 rounded-full bg-border" />}
                             {item.color && <span>{item.color}</span>}
                           </p>
-                          <div className="flex items-center justify-between mt-1.5">
+                          <div className="flex items-center justify-between mt-1">
                             <span className="text-sm font-display font-bold text-foreground">
                               {formatPrice((item.product?.price ?? 0) * item.quantity)}
                             </span>
                             <div className="flex items-center gap-1.5">
                               <button
+                                type="button"
                                 onClick={() => update(item.id, item.quantity - 1)}
                                 className="size-6 flex items-center justify-center bg-secondary rounded-sm hover:bg-accent transition-colors"
                               >
@@ -186,6 +185,7 @@ export function CheckoutDialog() {
                               </button>
                               <span className="w-6 text-center text-xs font-medium">{item.quantity}</span>
                               <button
+                                type="button"
                                 onClick={() => update(item.id, item.quantity + 1)}
                                 className="size-6 flex items-center justify-center bg-secondary rounded-sm hover:bg-accent transition-colors"
                               >
@@ -198,39 +198,12 @@ export function CheckoutDialog() {
                     )
                   })}
                 </div>
-              </ScrollArea>
 
-              {/* CTA Button */}
-              <Button
-                onClick={() => setStep('form')}
-                disabled={items.length === 0}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-11 text-sm tracking-wide-luxe font-medium"
-              >
-                إتمام الطلب <ArrowLeft className="size-4" />
-              </Button>
-              <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1 mt-3">
-                <ShieldCheck className="size-3.5" /> معاملتك آمنة ومشفّرة
-              </p>
-            </div>
-          </div>
-        ) : (
-          /* Checkout Form */
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-border">
-              <div className="flex items-center gap-2">
-                <ArrowRight className="size-5 text-gold" />
-                <h2 className="font-display text-lg font-bold text-foreground">بيانات الشحن</h2>
-              </div>
-              <button onClick={() => setStep('cart')} className="text-xs text-foreground/60 hover:text-foreground flex items-center gap-1">
-                <ArrowRight className="size-3.5" />
-                رجوع
-              </button>
-            </div>
+                {/* Divider */}
+                <div className="border-t border-border my-2" />
 
-            <ScrollArea className="flex-1">
-              <form onSubmit={submit} className="p-5 space-y-4">
                 {/* Customer Info */}
+                <h3 className="text-xs font-bold text-foreground/80 uppercase tracking-wider mb-2">بيانات الشحن</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="name" className="text-xs">الاسم الكامل <span className="text-destructive">*</span></Label>
@@ -274,7 +247,7 @@ export function CheckoutDialog() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="notes" className="text-xs">ملاحظات</Label>
-                  <Textarea id="notes" value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="rounded-sm min-h-16 text-xs" placeholder="تعليمات خاصة بالتوصيل" />
+                  <Textarea id="notes" value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="rounded-sm min-h-14 text-xs" placeholder="تعليمات خاصة بالتوصيل" />
                 </div>
 
                 {/* Payment method */}
@@ -302,22 +275,11 @@ export function CheckoutDialog() {
                   </div>
                 </div>
 
-                {/* Summary */}
-                <div className="flex justify-between items-center pt-3 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-foreground/60">الإجمالي</span>
-                    <span className="font-display text-base font-bold text-gold">{formatPrice(total)}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-foreground/50">
-                    <Truck className="size-3.5 text-gold" />
-                    {shipping === 0 ? 'شحن مجاني' : formatPrice(shipping)}
-                  </div>
-                </div>
-
+                {/* Submit Button */}
                 <Button
                   type="submit"
                   disabled={submitting || items.length === 0}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-11 text-sm tracking-wide-luxe font-medium mt-2"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-none h-11 text-sm tracking-wide-luxe font-medium mt-3"
                 >
                   {submitting ? (
                     <><Loader2 className="size-4 animate-spin" /> جارٍ المعالجة...</>
@@ -325,7 +287,7 @@ export function CheckoutDialog() {
                     <>تأكيد الطلب <ArrowLeft className="size-4" /></>
                   )}
                 </Button>
-                <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1">
+                <p className="text-xs text-center text-foreground/50 flex items-center justify-center gap-1 pb-1">
                   <ShieldCheck className="size-3.5" /> معاملتك آمنة ومشفّرة
                 </p>
               </form>
