@@ -37,52 +37,43 @@ export function Header({ categories }: { categories: Category[] }) {
       )}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 3-column grid: nav | logo | actions — each has reserved space, no overlap */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16 lg:h-20 gap-4">
-          {/* Left (RTL: right) — Mobile menu + Desktop nav */}
-          <div className="flex items-center gap-2 justify-self-start">
+        {/* Layout: nav (right) | logo (center) | actions (left) */}
+        <div className="flex items-center justify-between h-16 lg:h-20">
+          {/* Left (RTL: right) — Desktop nav only */}
+          <nav className="hidden lg:flex items-center gap-8">
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 -ms-2 text-foreground hover:text-gold transition-colors"
-              aria-label="القائمة"
+              onClick={() => scrollToProducts('all')}
+              className="text-sm font-medium tracking-wide-luxe text-foreground/80 hover:text-gold transition-colors relative group py-1"
             >
-              <Menu className="size-5" />
+              كل المنتجات
+              <span className="absolute bottom-0 right-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
             </button>
-            <nav className="hidden lg:flex items-center gap-7">
+            {categories.filter((c) => c.featured).map((c) => (
               <button
-                onClick={() => scrollToProducts('all')}
-                className="text-sm font-medium tracking-wide-luxe text-foreground/80 hover:text-gold transition-colors relative group py-1"
-              >
-                كل المنتجات
-                <span className="absolute bottom-0 right-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
-              </button>
-              {categories.filter((c) => c.featured).map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => scrollToProducts(c.slug)}
-                  className="text-sm font-medium tracking-wide-luxe text-foreground/80 hover:text-gold transition-colors relative group py-1 whitespace-nowrap"
-                >
-                  {c.name}
-                  <span className="absolute bottom-0 right-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
-                </button>
-              ))}
-              <button
-                onClick={() => {
-                  const el = document.getElementById('about')
-                  if (el) el.scrollIntoView({ behavior: 'smooth' })
-                }}
+                key={c.id}
+                onClick={() => scrollToProducts(c.slug)}
                 className="text-sm font-medium tracking-wide-luxe text-foreground/80 hover:text-gold transition-colors relative group py-1 whitespace-nowrap"
               >
-                عن فيلورا
+                {c.name}
                 <span className="absolute bottom-0 right-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
               </button>
-            </nav>
-          </div>
+            ))}
+            <button
+              onClick={() => {
+                const el = document.getElementById('about')
+                if (el) el.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className="text-sm font-medium tracking-wide-luxe text-foreground/80 hover:text-gold transition-colors relative group py-1 whitespace-nowrap"
+            >
+              عن فيلورا
+              <span className="absolute bottom-0 right-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
+            </button>
+          </nav>
 
-          {/* Center — Logo (reserved space, never overlaps) */}
+          {/* Center — Logo */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex flex-col items-center group justify-self-center px-2"
+            className="flex flex-col items-center group px-2"
             aria-label="فيلورا"
           >
             <span className={cn(
@@ -94,8 +85,15 @@ export function Header({ categories }: { categories: Category[] }) {
             <span className="text-[10px] tracking-luxe text-gold mt-0.5 font-medium whitespace-nowrap">فيلورا</span>
           </button>
 
-          {/* Right (RTL: left) — Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 justify-self-end">
+          {/* Right (RTL: left) — Mobile menu + Actions */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 -ms-2 text-foreground hover:text-gold transition-colors"
+              aria-label="القائمة"
+            >
+              <Menu className="size-5" />
+            </button>
             <button
               onClick={() => setSearchOpen(true)}
               className="p-2.5 text-foreground hover:text-gold transition-colors hover:bg-accent/60 rounded-full"
